@@ -19,7 +19,7 @@ X = data.drop("placed", axis=1)
 y = data["placed"]
 
 # Encode company
-encoder = OneHotEncoder(handle_unknown="ignore", sparse=False)
+encoder = OneHotEncoder(handle_unknown="ignore", sparse_output=False)
 company_encoded = encoder.fit_transform(X[["company"]])
 company_df = pd.DataFrame(company_encoded, columns=encoder.get_feature_names_out(["company"]))
 
