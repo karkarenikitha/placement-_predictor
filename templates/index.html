@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Placement Predictor</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: black;
+      color: white;
+      margin: 0;
+      padding: 0;
+      overflow-x: hidden;
+    }
+
+    .door-animation {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      display: flex;
+      z-index: 9999;
+    }
+
+    .door {
+      flex: 1;
+      background: #0658b0;
+      transition: transform 1.5s ease-in-out;
+    }
+    .left-door { transform-origin: left center; }
+    .right-door { transform-origin: right center; }
+    .door.open.left-door { transform: rotateY(-100deg); }
+    .door.open.right-door { transform: rotateY(100deg); }
+
+    .navbar {
+      display: flex;
+      align-items: center;
+      background: #e21a92;
+      color: white;
+      padding: 10px 20px;
+    }
+    .logo {
+      font-size: 24px;
+      font-weight: bold;
+      background: white;
+      color: #e21a92;
+      width: 40px; height: 40px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-right: 10px;
+    }
+
+    .container {
+      max-width: 600px;
+      margin: 30px auto;
+      padding: 20px;
+      background: #222;
+      border-radius: 8px;
+      box-shadow: 0 4px 8px rgba(255,255,255,0.2);
+    }
+
+    h2 { text-align: center; }
+    label { display: block; margin-top: 10px; font-weight: bold; }
+
+    input, select {
+      width: 100%;
+      padding: 8px;
+      margin-top: 5px;
+      border: 1px solid #555;
+      border-radius: 4px;
+      background: #333;
+      color: white;
+    }
+
+    /* Remove number input arrows */
+    input[type=number]::-webkit-inner-spin-button,
+    input[type=number]::-webkit-outer-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+    input[type=number] {
+      -moz-appearance: textfield; /* Firefox */
+    }
+
+    button {
+      margin-top: 15px;
+      padding: 10px;
+      width: 100%;
+      background: #0f5ecc;
+      color: white;
+      font-size: 16px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    button:hover { background: #357ab8; }
+
+    .result {
+      text-align: center;
+      margin-top: 20px;
+      font-size: 20px;
+      font-weight: bold;
+    }
+    .placed { color: limegreen; }
+    .not-placed { color: rgb(0, 255, 51); }
+  </style>
+</head>
+<body>
+
+  <!-- Door Animation -->
+  <div class="door-animation">
+    <div class="door left-door"></div>
+    <div class="door right-door"></div>
+  </div>
+
+  <div class="navbar">
+    <!-- Logo changed from @ to N -->
+    <div class="logo">N</div>
+    <div class="title">Placement Predictor</div>
+  </div>
+
+  <div class="container">
+    <h2>Enter Student Details</h2>
+    <form method="POST">
+      <label>10th Score (%)</label>
+      <input type="number" step="0.01" name="tenth_score" max="100" required 
+             oninput="if(this.value>100)this.value=100">
+
+      <label>12th Score (%)</label>
+      <input type="number" step="0.01" name="twelfth_score" max="100" required 
+             oninput="if(this.value>100)this.value=100">
+
+      <label>CGPA (out of 10)</label>
+      <input type="number" step="0.01" name="cgpa" max="10" required 
+             oninput="if(this.value>10)this.value=10">
+
+      <label>Number of Skills</label>
+      <input type="number" name="skills" required>
+
+      <label>Number of Internships</label>
+      <input type="number" name="internships" required>
+
+      <label>Number of Backlogs</label>
+      <input type="number" name="backlogs" required>
+
+      <label>Company</label>
+      <select name="company" required>
+        {% for company in companies %}
+          <option value="{{ company }}">{{ company }}</option>
+        {% endfor %}
+      </select>
+
+      <button type="submit">Launch Prediction</button>
+    </form>
+
+    {% if prediction %}
+      <div class="result {% if prediction == 'Will be Placed' %}placed{% else %}not-placed{% endif %}">
+        {{ prediction }}
+      </div>
+
+      <!-- Video display fixed -->
+      <div class="video-container" style="text-align:center; margin-top:20px;">
+        <video width="320" height="240" autoplay muted loop playsinline>
+          <source src="{{ url_for('static', filename=video_file) }}" type="video/mp4">
+          Your browser does not support the video tag.
+        </video>
+      </div>
+
+      <form method="GET">
+        <button type="submit">Back</button>
+      </form>
+    {% endif %}
+  </div>
+
+  <script>
+    window.addEventListener("load", () => {
+      document.querySelector(".left-door").classList.add("open");
+      document.querySelector(".right-door").classList.add("open");
+      setTimeout(() => {
+        document.querySelector(".door-animation").style.display = "none";
+      }, 1600);
+    });
+
+    // Prevent number inputs from changing value on scroll / two-finger swipe
+    document.addEventListener("wheel", function(event) {
+      if (document.activeElement.type === "number") {
+        event.preventDefault();
+      }
+    }, { passive: false });
+
+    // Prevent arrow keys ↑ ↓ from changing number inputs
+    document.addEventListener("keydown", function(event) {
+      if (document.activeElement.type === "number" && (event.key === "ArrowUp" || event.key === "ArrowDown")) {
+        event.preventDefault();
+      }
+    });
+  </script>
+
+</body>
+</html>
